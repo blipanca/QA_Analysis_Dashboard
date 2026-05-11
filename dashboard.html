@@ -1,0 +1,1319 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0a0a0a">
+<title>QA Product Dashboard — Telkomsel</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Inter+Tight:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+
+<style>
+:root{
+  --bg:#0a0a0a;
+  --surface:#141414;
+  --surface-2:#1c1c1c;
+  --surface-3:#262626;
+  --border:#2a2a2a;
+  --border-strong:#3a3a3a;
+  --text:#f5f5f5;
+  --text-dim:#a3a3a3;
+  --text-faint:#737373;
+  --accent:#ED1C24;
+  --accent-soft:rgba(237,28,36,.12);
+  --c1:#ED1C24;
+  --c2:#FF8A3D;
+  --c3:#FFC93C;
+  --c4:#5DD39E;
+  --c5:#3B82F6;
+  --c6:#A78BFA;
+  --c7:#EC4899;
+  --c8:#22D3EE;
+  --c9:#F472B6;
+  --serif:'Instrument Serif', Georgia, serif;
+  --sans:'Inter Tight', -apple-system, BlinkMacSystemFont, sans-serif;
+  --mono:'JetBrains Mono', ui-monospace, monospace;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;padding:0;background:var(--bg);color:var(--text);font-family:var(--sans);font-size:14px;line-height:1.5;-webkit-font-smoothing:antialiased}
+body{
+  background:
+    radial-gradient(ellipse 80% 50% at 50% -10%, rgba(237,28,36,.08), transparent 70%),
+    radial-gradient(ellipse 60% 40% at 100% 100%, rgba(59,130,246,.04), transparent 70%),
+    var(--bg);
+  min-height:100vh;
+  padding-bottom:48px;
+}
+button{font-family:inherit;cursor:pointer}
+a{color:inherit}
+
+/* ---------------- Header ---------------- */
+header{
+  position:sticky;top:0;z-index:50;
+  backdrop-filter:blur(20px);
+  -webkit-backdrop-filter:blur(20px);
+  background:rgba(10,10,10,.72);
+  border-bottom:1px solid var(--border);
+  padding:14px 20px;
+}
+.head-row{display:flex;align-items:center;gap:14px;max-width:1400px;margin:0 auto}
+.brand{display:flex;align-items:center;gap:10px;flex:1;min-width:0}
+.brand-mark{
+  width:34px;height:34px;border-radius:8px;flex-shrink:0;
+  background:linear-gradient(135deg,#ED1C24 0%,#8B0000 100%);
+  display:grid;place-items:center;font-family:var(--serif);font-style:italic;
+  font-size:22px;color:#fff;letter-spacing:-.02em;
+  box-shadow:0 8px 24px -10px rgba(237,28,36,.6);
+}
+.brand-text{min-width:0;overflow:hidden}
+.brand-title{font-family:var(--serif);font-size:22px;font-style:italic;line-height:1;letter-spacing:-.01em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.brand-sub{font-size:11px;color:var(--text-faint);letter-spacing:.08em;text-transform:uppercase;margin-top:3px;font-weight:500}
+
+.add-btn{
+  display:inline-flex;align-items:center;gap:7px;
+  padding:9px 14px;border-radius:9px;border:1px solid var(--accent);
+  background:var(--accent);color:#fff;
+  font-weight:600;font-size:13px;letter-spacing:-.01em;
+  transition:transform .15s, box-shadow .15s, filter .15s;
+  box-shadow:0 4px 14px -3px rgba(237,28,36,.4);
+  white-space:nowrap;
+}
+.add-btn:hover{filter:brightness(1.08);transform:translateY(-1px)}
+.add-btn:active{transform:translateY(0)}
+.add-btn svg{width:15px;height:15px}
+
+/* ---------------- Hero ---------------- */
+.wrap{max-width:1400px;margin:0 auto;padding:24px 20px 0}
+.hero{margin:8px 0 22px;display:flex;flex-direction:column;gap:6px}
+.hero h1{
+  font-family:var(--serif);
+  font-size:clamp(34px,6vw,56px);
+  line-height:.98;letter-spacing:-.025em;
+  margin:0;font-weight:400;
+}
+.hero h1 em{color:var(--accent);font-style:italic}
+.hero p{color:var(--text-dim);margin:6px 0 0;font-size:15px;max-width:640px}
+
+/* ---------------- File chips ---------------- */
+.chips{
+  display:flex;gap:8px;overflow-x:auto;
+  padding:4px 0 12px;margin:0 -20px 18px;padding:4px 20px 12px;
+  scrollbar-width:none;
+  border-bottom:1px solid var(--border);
+}
+.chips::-webkit-scrollbar{display:none}
+.chip{
+  display:inline-flex;flex-direction:column;align-items:flex-start;gap:2px;
+  padding:10px 14px;border-radius:11px;
+  background:var(--surface);border:1px solid var(--border);
+  color:var(--text-dim);
+  font-size:13px;font-weight:600;letter-spacing:-.01em;
+  white-space:nowrap;flex-shrink:0;
+  transition:all .18s;
+  position:relative;
+}
+.chip .chip-rows{font-size:10px;font-weight:500;color:var(--text-faint);font-family:var(--mono);letter-spacing:0}
+.chip:hover{border-color:var(--border-strong);color:var(--text)}
+.chip.active{
+  background:var(--accent-soft);border-color:var(--accent);color:var(--text);
+}
+.chip.active .chip-rows{color:var(--accent)}
+.chip .chip-x{
+  position:absolute;top:-4px;right:-4px;width:18px;height:18px;border-radius:50%;
+  background:var(--surface-3);border:1px solid var(--border-strong);color:var(--text-dim);
+  display:none;align-items:center;justify-content:center;font-size:10px;line-height:1;
+  cursor:pointer;
+}
+.chip.user-added .chip-x{display:flex}
+.chip.user-added .chip-x:hover{background:var(--accent);color:#fff;border-color:var(--accent)}
+
+/* ---------------- KPI cards ---------------- */
+.kpi-grid{
+  display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px;
+  margin-bottom:22px;
+}
+.kpi{
+  background:var(--surface);border:1px solid var(--border);
+  border-radius:14px;padding:16px;position:relative;overflow:hidden;
+}
+.kpi::before{
+  content:'';position:absolute;left:0;top:0;width:3px;height:100%;
+  background:var(--accent);opacity:.7;
+}
+.kpi.k2::before{background:var(--c2)}
+.kpi.k3::before{background:var(--c4)}
+.kpi.k4::before{background:var(--c5)}
+.kpi.k5::before{background:var(--c6)}
+.kpi-label{font-size:11px;color:var(--text-faint);text-transform:uppercase;letter-spacing:.08em;font-weight:600}
+.kpi-value{font-family:var(--mono);font-size:26px;font-weight:600;letter-spacing:-.02em;margin-top:6px;line-height:1}
+.kpi-sub{font-size:12px;color:var(--text-dim);margin-top:6px;font-family:var(--mono)}
+
+/* ---------------- Charts grid ---------------- */
+.section-title{
+  font-family:var(--serif);font-style:italic;font-size:24px;
+  margin:32px 0 14px;letter-spacing:-.01em;font-weight:400;
+}
+.section-title .num{font-family:var(--mono);font-size:13px;color:var(--text-faint);margin-right:10px;font-style:normal;font-weight:500;vertical-align:middle}
+
+.charts{
+  display:grid;grid-template-columns:repeat(auto-fit,minmax(360px,1fr));gap:14px;
+}
+.card{
+  background:var(--surface);border:1px solid var(--border);
+  border-radius:14px;padding:18px;
+  display:flex;flex-direction:column;
+  min-height:0;
+}
+.card-head{display:flex;align-items:baseline;justify-content:space-between;gap:8px;margin-bottom:14px}
+.card-title{font-size:14px;font-weight:600;color:var(--text);letter-spacing:-.01em}
+.card-sub{font-size:11px;color:var(--text-faint);font-family:var(--mono);letter-spacing:0;text-transform:uppercase}
+.card.wide{grid-column:1/-1}
+.chart-host{position:relative;flex:1;min-height:240px}
+.chart-host.tall{min-height:340px}
+
+/* ---------------- Table preview ---------------- */
+.table-wrap{
+  background:var(--surface);border:1px solid var(--border);border-radius:14px;
+  overflow:hidden;margin-top:14px;
+}
+.table-head{padding:14px 18px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.tbl{width:100%;border-collapse:collapse;font-family:var(--mono);font-size:12px}
+.tbl-scroll{overflow-x:auto;max-height:360px;overflow-y:auto}
+.tbl th{position:sticky;top:0;background:var(--surface-2);text-align:left;padding:10px 12px;font-weight:600;color:var(--text-dim);border-bottom:1px solid var(--border);white-space:nowrap;font-size:11px;letter-spacing:.04em;text-transform:uppercase;z-index:1}
+.tbl td{padding:9px 12px;border-bottom:1px solid var(--border);color:var(--text-dim);white-space:nowrap;max-width:280px;overflow:hidden;text-overflow:ellipsis}
+.tbl tr:hover td{background:rgba(255,255,255,.02);color:var(--text)}
+
+/* ---------------- Drop zone ---------------- */
+.drop-overlay{
+  position:fixed;inset:0;background:rgba(10,10,10,.92);z-index:100;
+  display:none;align-items:center;justify-content:center;padding:30px;
+  backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);
+}
+.drop-overlay.show{display:flex}
+.drop-box{
+  border:2px dashed var(--accent);border-radius:18px;
+  padding:60px 40px;text-align:center;max-width:520px;width:100%;
+  background:rgba(237,28,36,.04);
+}
+.drop-box h3{font-family:var(--serif);font-style:italic;font-size:32px;margin:0 0 8px;font-weight:400}
+.drop-box p{color:var(--text-dim);margin:0}
+
+/* ---------------- Toast ---------------- */
+.toast{
+  position:fixed;left:50%;bottom:24px;transform:translateX(-50%) translateY(80px);
+  background:var(--surface-2);border:1px solid var(--border-strong);
+  padding:12px 18px;border-radius:11px;font-size:13px;
+  box-shadow:0 12px 40px -10px rgba(0,0,0,.6);
+  transition:transform .25s ease, opacity .25s ease;opacity:0;z-index:200;
+}
+.toast.show{transform:translateX(-50%) translateY(0);opacity:1}
+.toast.err{border-color:var(--accent);color:#ffb4b8}
+
+/* ---------------- Executive panels ---------------- */
+.exec-hero{
+  background:linear-gradient(135deg, rgba(237,28,36,.06) 0%, rgba(59,130,246,.04) 100%);
+  border:1px solid var(--border);border-radius:16px;
+  padding:22px;margin-bottom:18px;
+}
+.exec-hero-label{font-size:11px;color:var(--accent);text-transform:uppercase;letter-spacing:.14em;font-weight:700}
+.exec-hero h2{font-family:var(--serif);font-style:italic;font-weight:400;font-size:clamp(22px,3.6vw,30px);line-height:1.2;letter-spacing:-.015em;margin:8px 0 0;max-width:780px}
+.exec-hero h2 .h{color:var(--accent);font-style:italic}
+.exec-hero h2 .g{color:var(--c4);font-style:italic}
+
+.panels{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:22px}
+@media(max-width:680px){.panels{grid-template-columns:1fr}}
+.panel{
+  background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:18px;
+  position:relative;overflow:hidden;
+}
+.panel::before{content:'';position:absolute;left:0;top:0;height:100%;width:3px}
+.panel.win::before{background:var(--c4)}
+.panel.risk::before{background:var(--accent)}
+.panel-head{display:flex;align-items:center;gap:10px;margin-bottom:14px}
+.panel-tag{
+  display:inline-flex;align-items:center;gap:6px;padding:4px 10px;border-radius:999px;
+  font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;
+}
+.panel.win .panel-tag{background:rgba(93,211,158,.14);color:var(--c4)}
+.panel.risk .panel-tag{background:rgba(237,28,36,.14);color:var(--accent)}
+.panel-tag::before{content:'';width:6px;height:6px;border-radius:50%;background:currentColor}
+.panel h3{font-family:var(--serif);font-style:italic;font-weight:400;font-size:18px;margin:0;letter-spacing:-.01em;color:var(--text)}
+.panel-list{margin:6px 0 0;padding:0;list-style:none}
+.panel-list li{
+  padding:11px 0;border-bottom:1px dashed var(--border);
+  display:flex;align-items:baseline;justify-content:space-between;gap:12px;
+}
+.panel-list li:last-child{border-bottom:none}
+.panel-list .label{flex:1;font-size:13px;color:var(--text-dim);min-width:0}
+.panel-list .label b{color:var(--text);font-weight:600}
+.panel-list .delta{
+  font-family:var(--mono);font-size:13px;font-weight:600;flex-shrink:0;
+}
+.panel.win .delta{color:var(--c4)}
+.panel.risk .delta{color:var(--accent)}
+
+.action-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:12px;margin-bottom:22px}
+.action{
+  background:var(--surface);border:1px solid var(--border);border-radius:13px;padding:16px;
+  display:flex;flex-direction:column;gap:8px;position:relative;
+}
+.action-num{
+  font-family:var(--serif);font-style:italic;font-size:34px;line-height:1;
+  color:var(--accent);letter-spacing:-.02em;
+}
+.action-title{font-weight:600;font-size:14px;letter-spacing:-.01em}
+.action-body{font-size:12.5px;color:var(--text-dim);line-height:1.55}
+.action-tag{
+  display:inline-block;font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;
+  padding:3px 8px;border-radius:5px;background:var(--surface-3);color:var(--text-dim);align-self:flex-start;
+}
+.action-tag.urgent{background:rgba(237,28,36,.14);color:var(--accent)}
+.action-tag.gov{background:rgba(255,138,61,.14);color:var(--c2)}
+.action-tag.eff{background:rgba(93,211,158,.14);color:var(--c4)}
+
+.latency-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:10px;margin-bottom:18px}
+.lat-cell{
+  background:var(--surface);border:1px solid var(--border);border-radius:11px;padding:12px 14px;
+  display:flex;flex-direction:column;gap:4px;position:relative;
+}
+.lat-cell::after{content:'';position:absolute;right:14px;top:14px;width:8px;height:8px;border-radius:50%}
+.lat-cell.ok::after{background:var(--c4)}
+.lat-cell.warn::after{background:var(--c2)}
+.lat-cell.bad::after{background:var(--accent);animation:pulse 1.6s ease-in-out infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+.lat-prod{font-size:12px;color:var(--text-dim)}
+.lat-val{font-family:var(--mono);font-size:20px;font-weight:600;letter-spacing:-.01em}
+
+.bullet-narrative{
+  background:var(--surface);border-left:3px solid var(--accent);
+  padding:14px 18px;border-radius:0 12px 12px 0;
+  margin:14px 0;font-size:13.5px;color:var(--text-dim);line-height:1.65;
+}
+.bullet-narrative em{font-family:var(--serif);font-style:italic;color:var(--text);font-size:15px}
+
+/* ---------------- Bullet point sections ---------------- */
+.bullet-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:14px;margin-bottom:22px}
+.bullet-card{
+  background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:18px;
+  position:relative;overflow:hidden;
+}
+.bullet-card::before{content:'';position:absolute;left:0;top:0;width:100%;height:3px}
+.bullet-card.perf::before{background:linear-gradient(90deg,var(--c4),transparent)}
+.bullet-card.risk::before{background:linear-gradient(90deg,var(--accent),transparent)}
+.bullet-card.cx::before{background:linear-gradient(90deg,var(--c5),transparent)}
+.bullet-card-head{display:flex;align-items:center;gap:10px;margin-bottom:14px}
+.bullet-card-num{
+  font-family:var(--mono);font-size:11px;font-weight:700;letter-spacing:.1em;
+  padding:3px 8px;border-radius:5px;background:var(--surface-3);color:var(--text-dim);
+}
+.bullet-card.perf .bullet-card-num{background:rgba(93,211,158,.14);color:var(--c4)}
+.bullet-card.risk .bullet-card-num{background:rgba(237,28,36,.14);color:var(--accent)}
+.bullet-card.cx .bullet-card-num{background:rgba(59,130,246,.14);color:var(--c5)}
+.bullet-card h4{font-family:var(--serif);font-style:italic;font-weight:400;font-size:18px;margin:0;letter-spacing:-.01em;color:var(--text)}
+.bullet-card ul{margin:0;padding:0;list-style:none}
+.bullet-card li{
+  position:relative;padding:9px 0 9px 22px;
+  font-size:13px;color:var(--text-dim);line-height:1.55;
+  border-bottom:1px dashed var(--border);
+}
+.bullet-card li:last-child{border-bottom:none}
+.bullet-card li::before{
+  content:'';position:absolute;left:6px;top:16px;width:6px;height:6px;border-radius:50%;
+  background:var(--text-faint);
+}
+.bullet-card.perf li::before{background:var(--c4)}
+.bullet-card.risk li::before{background:var(--accent)}
+.bullet-card.cx li::before{background:var(--c5)}
+.bullet-card li b{color:var(--text);font-weight:600}
+.bullet-card li code{
+  font-family:var(--mono);font-size:11.5px;
+  background:var(--surface-2);padding:1px 6px;border-radius:4px;
+  color:var(--text);border:1px solid var(--border);
+}
+
+/* ---------------- Glossary ---------------- */
+.glossary{
+  display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:10px;margin-bottom:22px;
+}
+.gloss-card{
+  background:var(--surface);border:1px solid var(--border);border-radius:11px;padding:14px 16px;
+}
+.gloss-term{
+  display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:6px;
+}
+.gloss-term b{font-size:13.5px;color:var(--text);letter-spacing:-.01em;font-weight:600}
+.gloss-val{font-family:var(--mono);font-size:13px;font-weight:600;color:var(--accent);white-space:nowrap}
+.gloss-desc{font-size:12.5px;color:var(--text-dim);line-height:1.55;margin:0}
+.gloss-formula{
+  display:inline-block;font-family:var(--mono);font-size:11px;
+  background:var(--surface-2);padding:3px 8px;border-radius:5px;
+  color:var(--text-dim);border:1px solid var(--border);margin-top:6px;
+}
+
+/* ---------------- Footer note ---------------- */
+.foot{margin-top:40px;padding-top:18px;border-top:1px solid var(--border);text-align:center;color:var(--text-faint);font-size:12px}
+.foot strong{color:var(--text-dim);font-weight:500}
+.foot em{font-family:var(--serif);font-style:italic;color:var(--accent)}
+
+/* ---------------- Scrollbars ---------------- */
+::-webkit-scrollbar{width:10px;height:10px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:var(--border-strong);border-radius:6px;border:2px solid var(--bg)}
+::-webkit-scrollbar-thumb:hover{background:#4a4a4a}
+
+/* ---------------- Mobile tweaks ---------------- */
+@media (max-width:680px){
+  .wrap{padding:16px 14px 0}
+  header{padding:12px 14px}
+  .chips{margin:0 -14px 16px;padding:4px 14px 12px}
+  .charts{grid-template-columns:1fr}
+  .kpi-value{font-size:22px}
+  .hero h1{font-size:38px}
+  .add-btn{padding:8px 12px;font-size:12px}
+  .add-btn span{display:none}
+  .add-btn svg{width:18px;height:18px}
+  .brand-sub{display:none}
+  .card{padding:14px}
+  .chart-host{min-height:220px}
+  .chart-host.tall{min-height:280px}
+}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="head-row">
+    <div class="brand">
+      <div class="brand-mark">Q</div>
+      <div class="brand-text">
+        <div class="brand-title">QA Product Dashboard</div>
+        <div class="brand-sub">Telkomsel · 2026</div>
+      </div>
+    </div>
+    <button class="add-btn" id="addBtn" title="Tambah file XLSX">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg>
+      <span>Add File</span>
+    </button>
+    <input type="file" id="fileInput" accept=".xlsx,.xls" multiple style="display:none">
+  </div>
+</header>
+
+<main class="wrap">
+
+  <div class="hero">
+    <h1>Analisis ringkas <em>3 file</em>, satu layar.</h1>
+    <p>Pilih file di bawah untuk lihat KPI, tren, breakdown produk &amp; regional. Tombol <strong style="color:var(--text)">Add File</strong> di pojok kanan untuk tambah XLSX baru — semua diproses lokal di browser.</p>
+  </div>
+
+  <div class="chips" id="chips"></div>
+
+  <div id="dashboardBody"></div>
+
+  <div class="foot">
+    @2026 Divisi Technology Collaboration & Consumer Product Testing 
+  </div>
+</main>
+
+<div class="drop-overlay" id="dropOverlay">
+  <div class="drop-box">
+    <h3>Lepaskan file di sini</h3>
+    <p>Format yang didukung: <code style="font-family:var(--mono);color:var(--text)">.xlsx</code> dan <code style="font-family:var(--mono);color:var(--text)">.xls</code></p>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+/* ============================================================
+   Embedded summary data (pre-cleaned from the 3 source files)
+   ============================================================ */
+const EMBEDDED = {"kip": {"filename": "KIP_April_2026_CLEANED.xlsx", "label": "KIP April 2026", "total_rows": 409, "date_range": ["2026-04-01", "2026-04-26"], "by_product": {"CHATGPT Go": 170, "Siscamling": 86, "Jaringan Prioritas": 51, "Proteksi Kecil": 38, "SIMPATI TikTok": 32, "Travel Assistant": 20, "FTTR": 7, "VNSP": 3, "OWDI": 2}, "by_unit_type": {"callcenter": 324, "webservice": 56, "grapari": 29}, "by_type_1": {"(DE)AKTIVASI PRODUK": 211, "MUTASI": 120, "REGISTRASI & REAKTIVASI": 40, "LAYANAN JARINGAN": 22, "TAGIHAN & PEMBAYARAN": 11, "CAMPAIGN & LOYALTY": 3, "TERMINASI": 1, "BACKEND QUERY & SYSTEM": 1}, "by_type_2": {"Digital Life Style": 143, "Voluntary Block": 86, "Aktivasi Paket": 61, "Registrasi & Aktivasi": 39, "Ganti Paket": 33, "Use Service": 19, "Tagihan Pelanggan": 11, "Deaktivasi": 3, "Internet": 3, "Campaign Bundling": 2}, "top_type_3": {"K26-Pembelian berhasil namun subscription tidak didapatkan": 107, "K57-Pengaduan SMS Penipuan / Spam / Virus / Promosi": 86, "K45-Gagal Registrasi/Aktivasi ProtekSi Kecil": 37, "K26-Layanan aplikasi tidak bisa digunakan": 31, "K54-Gagal modify offer/VAS": 31, "K21-Tidak merasa melakukan aktivasi produk": 12, "K21-Ketidaksesuaian spesifikasi produk": 10, "K21-Gagal/error saat aktivasi produk": 9, "K21-Pembelian berhasil, saldo terpotong, namun benefit tidak didapatkan": 8, "K41-Tagihan tiba-tiba membengkak (Bill Shock)": 8}, "daily_count": {"2026-04-01": 19, "2026-04-02": 19, "2026-04-03": 11, "2026-04-04": 13, "2026-04-05": 11, "2026-04-06": 18, "2026-04-07": 15, "2026-04-08": 13, "2026-04-09": 14, "2026-04-10": 19, "2026-04-11": 16, "2026-04-12": 23, "2026-04-13": 17, "2026-04-14": 9, "2026-04-15": 17, "2026-04-16": 19, "2026-04-17": 17, "2026-04-18": 13, "2026-04-19": 17, "2026-04-20": 12, "2026-04-21": 24, "2026-04-22": 10, "2026-04-23": 11, "2026-04-24": 16, "2026-04-25": 21, "2026-04-26": 15}}, "cohort": {"filename": "cohort_oct25_mar26_lis_CLEANED.xlsx", "label": "Cohort LIS Oct25 - Mar26", "total_rows": 21249, "month_range": ["202510", "202603"], "by_month_lis": {"202510": 248329, "202511": 248329, "202512": 248329, "202601": 248329, "202602": 248329, "202603": 248329}, "by_month_with_ticket": {"202510": 18862, "202511": 17569, "202512": 18798, "202601": 20068, "202602": 17450, "202603": 13737}, "by_area": {"AREA 2": 1489974}, "by_region_top10": {"JAKARTA BANTEN": 967740, "EASTERN JABOTABEK": 522234}, "by_speed_mb": {"100": 1453160, "300": 36814}, "by_arpu_group": {"01. <225K": 4079, "02. 225K-275K": 131406, "03. 275K-300K": 303888, "04. 300K-350K": 586132, "05. >350K": 464468, "06. null": 1}, "by_class_cat": {"BILLING": 65, "NON TECHNICAL": 2464, "TECHNICAL": 103931}, "total_lis": 1489974, "total_with_ticket": 106484, "total_no_ticket": 1383490, "total_revenue": 578017290358.6296, "total_usage_gb": 1017743770.3890169}, "qa": {"filename": "Dashboard_QA_Product_Q1_2026_CLEANED.xlsx", "label": "Dashboard QA Product Q1 2026", "total_rows": 7883, "date_range": ["2026-01-01", "2026-04-19"], "by_product": {"CHATGPT Go": 2548, "Jaringan Prioritas": 1857, "Travel Assistant": 1136, "Siscamling": 841, "SIMPATI TikTok": 546, "FTTR": 526, "Proteksi Kecil": 228, "VNSP": 164, "OWDI": 27, "Indihome Smart": 7, "RT/RW Net": 3}, "by_regional": {"Jateng": 2780, "Jabar": 2216, "Headquarter": 1117, "Jakarta dan Banten": 658, "Sumbagut": 285, "Sumbagteng": 181, "Sumbagsel": 175, "Jatim": 166, "East Jakarta": 126, "Sulawesi": 64, "Kalimantan": 52, "BaliNusra": 49, "PapuaMaluku": 14}, "top_type_3": {"P21-Permintaan aktivasi produk": 819, "P54-Permintaan modify offer/VAS": 680, "P11 - Permintaan aktivasi gimmick / diskon Halo PSB/SPTP/P2P": 473, "K26-Pembelian berhasil namun subscription tidak didapatkan": 441, "I21-Informasi sisa kuota & paket yg aktif": 413, "C81-Pengecekan status pembelian prod": 373, "P23-Permintaan deaktivasi produk": 365, "P21 - Permintaan aktivasi produk": 293, "K57-Pengaduan SMS Penipuan / Spam / Virus / Promosi": 267, "I21-Informasi spesifikasi produk (tarif & benefit)": 224}, "monthly_trend": {"CHATGPT Go": {"2026-01": 897, "2026-02": 849, "2026-03": 727, "2026-04": 564}, "Jaringan Prioritas": {"2026-01": 617, "2026-02": 509, "2026-03": 438, "2026-04": 295}, "Travel Assistant": {"2026-01": 436, "2026-02": 226, "2026-03": 307, "2026-04": 200}, "Siscamling": {"2026-01": 211, "2026-02": 216, "2026-03": 260, "2026-04": 158}, "SIMPATI TikTok": {"2026-01": 150, "2026-02": 141, "2026-03": 144, "2026-04": 115}, "Proteksi Kecil": {"2026-01": 59, "2026-02": 59, "2026-03": 68, "2026-04": 46}, "VNSP": {"2026-01": 43, "2026-02": 51, "2026-03": 49, "2026-04": 21}, "FTTR": {"2026-01": 140, "2026-02": 245, "2026-03": 327, "2026-04": 324}, "Indihome Smart": {"2026-01": 2, "2026-02": 1, "2026-03": 1, "2026-04": 3}}, "regional_matrix": {"Jateng": {"CHATGPT Go": 745, "FTTR": 10, "Indihome Smart": 0, "Jaringan Prioritas": 770, "Proteksi Kecil": 57, "SIMPATI TikTok": 188, "Siscamling": 568, "Travel Assistant": 366, "VNSP": 82}, "Jabar": {"CHATGPT Go": 561, "FTTR": 20, "Indihome Smart": 0, "Jaringan Prioritas": 930, "Proteksi Kecil": 78, "SIMPATI TikTok": 112, "Siscamling": 126, "Travel Assistant": 395, "VNSP": 56}, "Jakarta dan Banten": {"CHATGPT Go": 179, "FTTR": 939, "Indihome Smart": 5, "Jaringan Prioritas": 4, "Proteksi Kecil": 44, "SIMPATI TikTok": 22, "Siscamling": 13, "Travel Assistant": 40, "VNSP": 3}, "Headquarter": {"CHATGPT Go": 647, "FTTR": 14, "Indihome Smart": 0, "Jaringan Prioritas": 134, "Proteksi Kecil": 12, "SIMPATI TikTok": 145, "Siscamling": 86, "Travel Assistant": 63, "VNSP": 18}, "Sumbagteng": {"CHATGPT Go": 317, "FTTR": 0, "Indihome Smart": 0, "Jaringan Prioritas": 3, "Proteksi Kecil": 2, "SIMPATI TikTok": 9, "Siscamling": 7, "Travel Assistant": 17, "VNSP": 0}, "Sumbagut": {"CHATGPT Go": 138, "FTTR": 0, "Indihome Smart": 0, "Jaringan Prioritas": 13, "Proteksi Kecil": 1, "SIMPATI TikTok": 40, "Siscamling": 14, "Travel Assistant": 100, "VNSP": 1}, "Sumbagsel": {"CHATGPT Go": 223, "FTTR": 1, "Indihome Smart": 0, "Jaringan Prioritas": 0, "Proteksi Kecil": 4, "SIMPATI TikTok": 5, "Siscamling": 10, "Travel Assistant": 16, "VNSP": 0}, "Jatim": {"CHATGPT Go": 74, "FTTR": 8, "Indihome Smart": 2, "Jaringan Prioritas": 2, "Proteksi Kecil": 5, "SIMPATI TikTok": 3, "Siscamling": 8, "Travel Assistant": 89, "VNSP": 0}, "East Jakarta": {"CHATGPT Go": 38, "FTTR": 43, "Indihome Smart": 0, "Jaringan Prioritas": 0, "Proteksi Kecil": 8, "SIMPATI TikTok": 14, "Siscamling": 4, "Travel Assistant": 36, "VNSP": 4}, "Sulawesi": {"CHATGPT Go": 68, "FTTR": 0, "Indihome Smart": 0, "Jaringan Prioritas": 0, "Proteksi Kecil": 2, "SIMPATI TikTok": 1, "Siscamling": 2, "Travel Assistant": 2, "VNSP": 0}, "Kalimantan": {"CHATGPT Go": 22, "FTTR": 0, "Indihome Smart": 0, "Jaringan Prioritas": 2, "Proteksi Kecil": 7, "SIMPATI TikTok": 5, "Siscamling": 5, "Travel Assistant": 20, "VNSP": 0}, "BaliNusra": {"CHATGPT Go": 13, "FTTR": 1, "Indihome Smart": 0, "Jaringan Prioritas": 1, "Proteksi Kecil": 12, "SIMPATI TikTok": 2, "Siscamling": 2, "Travel Assistant": 25, "VNSP": 0}, "PapuaMaluku": {"CHATGPT Go": 12, "FTTR": 0, "Indihome Smart": 0, "Jaringan Prioritas": 0, "Proteksi Kecil": 0, "SIMPATI TikTok": 4, "Siscamling": 0, "Travel Assistant": 0, "VNSP": 0}}, "top5_issues": [{"product_name": "CHATGPT Go", "type_3": "K26-Pembelian berhasil namun subscription tidak didapatkan", "Count": 430}, {"product_name": "CHATGPT Go", "type_3": "K26-Layanan aplikasi tidak bisa digunakan", "Count": 78}, {"product_name": "Jaringan Prioritas", "type_3": "K54-Gagal modify offer/VAS", "Count": 91}, {"product_name": "Proteksi Kecil", "type_3": "K45 - Gagal Registrasi/Aktivasi ProtekSi Kecil", "Count": 133}, {"product_name": "Siscamling", "type_3": "K57-Pengaduan SMS Penipuan / Spam / Virus / Promosi", "Count": 265}], "daily_subs": {"2026-01-01": 4759, "2026-01-02": 19748, "2026-01-03": 20919, "2026-01-04": 20324, "2026-01-05": 19898, "2026-01-06": 20706, "2026-01-07": 18875, "2026-01-08": 20598, "2026-01-09": 20809, "2026-01-10": 19885, "2026-01-11": 21454, "2026-01-12": 18640, "2026-01-13": 17458, "2026-01-14": 18433, "2026-01-15": 19303, "2026-01-16": 19168, "2026-01-17": 18758, "2026-01-18": 18051, "2026-01-19": 18059, "2026-01-20": 17489, "2026-01-21": 20346, "2026-01-22": 21154, "2026-01-23": 19922, "2026-01-24": 16680, "2026-01-25": 20617, "2026-01-26": 1658631, "2026-01-27": 8226, "2026-01-28": 8752, "2026-01-29": 8941, "2026-01-30": 9397, "2026-01-31": 50470, "2026-02-01": 11317, "2026-02-02": 10023, "2026-02-03": 9123, "2026-02-04": 10267, "2026-02-05": 14606, "2026-02-06": 13454, "2026-02-07": 14412, "2026-02-08": 12820, "2026-02-09": 12847, "2026-02-10": 12197, "2026-02-11": 10866, "2026-02-12": 9534, "2026-02-13": 11956, "2026-02-14": 11836, "2026-02-15": 11201, "2026-02-16": 10228, "2026-02-17": 9314, "2026-02-18": 7724, "2026-02-19": 6656, "2026-02-20": 7875, "2026-02-21": 9972, "2026-02-22": 9842, "2026-02-23": 10451, "2026-02-24": 9769, "2026-02-25": 7770, "2026-02-26": 6980, "2026-02-27": 945324, "2026-02-28": 50197, "2026-03-01": 9931, "2026-03-02": 9634, "2026-03-03": 10078, "2026-03-04": 10477, "2026-03-05": 10359, "2026-03-06": 11247, "2026-03-07": 11033, "2026-03-08": 10885, "2026-03-09": 11003, "2026-03-10": 10902, "2026-03-11": 11256, "2026-03-12": 10793, "2026-03-13": 10460, "2026-03-14": 10302, "2026-03-15": 8720, "2026-03-16": 8309, "2026-03-17": 8828, "2026-03-18": 8517, "2026-03-19": 8244, "2026-03-20": 8423, "2026-03-21": 9911, "2026-03-22": 9699, "2026-03-23": 9525, "2026-03-24": 8866, "2026-03-25": 9001, "2026-03-26": 9154, "2026-03-27": 10990, "2026-03-28": 1040328, "2026-03-29": 11815, "2026-03-30": 11986, "2026-03-31": 58375, "2026-04-01": 15016, "2026-04-02": 13606, "2026-04-03": 13223, "2026-04-04": 1642, "2026-04-05": 9749, "2026-04-06": 11553, "2026-04-07": 11666, "2026-04-08": 10717, "2026-04-09": 10349, "2026-04-10": 10636, "2026-04-11": 9937, "2026-04-12": 9680, "2026-04-13": 26065, "2026-04-14": 25402, "2026-04-15": 25328, "2026-04-16": 53109, "2026-04-17": 34054, "2026-04-18": 83258, "2026-04-19": 332970138, "2026-04-20": 33734, "2026-04-21": 34694, "2026-04-22": 33635, "2026-04-23": 32722, "2026-04-24": 33166, "2026-04-25": 26423, "2026-04-26": 24757, "2026-04-29": 167269967}, "daily_rev": {"2026-01-01": 162922850, "2026-01-02": 452674480, "2026-01-03": 436028710, "2026-01-04": 448518256, "2026-01-05": 474997771, "2026-01-06": 463080433, "2026-01-07": 401656766, "2026-01-08": 523041846, "2026-01-09": 503410600, "2026-01-10": 491552049, "2026-01-11": 502616691, "2026-01-12": 457088490, "2026-01-13": 433911716, "2026-01-14": 458404470, "2026-01-15": 463029790, "2026-01-16": 414919011, "2026-01-17": 417060990, "2026-01-18": 413148924, "2026-01-19": 414348026, "2026-01-20": 392159466, "2026-01-21": 435107980, "2026-01-22": 459254033, "2026-01-23": 416386171, "2026-01-24": 364655384, "2026-01-25": 436520280, "2026-01-26": 14100030705, "2026-01-27": 243608180, "2026-01-28": 231191830, "2026-01-29": 217893180, "2026-01-30": 224717108, "2026-01-31": 1870804662, "2026-02-01": 294644990, "2026-02-02": 294241890, "2026-02-03": 271318570, "2026-02-04": 298479630, "2026-02-05": 365920094, "2026-02-06": 307062824, "2026-02-07": 299032114, "2026-02-08": 290062608, "2026-02-09": 287058084, "2026-02-10": 255334000, "2026-02-11": 206720670, "2026-02-12": 205318070, "2026-02-13": 288156640, "2026-02-14": 300223610, "2026-02-15": 271346644, "2026-02-16": 230537400, "2026-02-17": 194254450, "2026-02-18": 148190934, "2026-02-19": 129605810, "2026-02-20": 151053829, "2026-02-21": 221295910, "2026-02-22": 216120340, "2026-02-23": 240687671, "2026-02-24": 227611290, "2026-02-25": 168402125, "2026-02-26": 145790630, "2026-02-27": 8512291994, "2026-02-28": 1891464270, "2026-03-01": 245876042, "2026-03-02": 220729200, "2026-03-03": 228221480, "2026-03-04": 250846380, "2026-03-05": 252084910, "2026-03-06": 271848410, "2026-03-07": 263476088, "2026-03-08": 270655540, "2026-03-09": 235146690, "2026-03-10": 264382673, "2026-03-11": 273030294, "2026-03-12": 286095751, "2026-03-13": 318631012, "2026-03-14": 338665480, "2026-03-15": 301198344, "2026-03-16": 264698940, "2026-03-17": 310146034, "2026-03-18": 290096770, "2026-03-19": 247333882, "2026-03-20": 235136630, "2026-03-21": 254729058, "2026-03-22": 257240360, "2026-03-23": 240410610, "2026-03-24": 210330812, "2026-03-25": 211156110, "2026-03-26": 195585467, "2026-03-27": 256317216, "2026-03-28": 10190641110, "2026-03-29": 258670956, "2026-03-30": 269958172, "2026-03-31": 2121861606, "2026-04-01": 321505157, "2026-04-02": 317130253, "2026-04-03": 290542628, "2026-04-04": 43789363, "2026-04-05": 215952810, "2026-04-06": 258107894, "2026-04-07": 267254205, "2026-04-08": 221748807, "2026-04-09": 216867935, "2026-04-10": 218133643, "2026-04-11": 204264317, "2026-04-12": 197577160, "2026-04-13": 199542139, "2026-04-14": 182531743, "2026-04-15": 175429997, "2026-04-16": 239555936, "2026-04-17": 252691446, "2026-04-18": 263859838, "2026-04-19": 355877379, "2026-04-20": 273281938, "2026-04-21": 262576536, "2026-04-22": 266384615, "2026-04-23": 246114861, "2026-04-24": 257283839, "2026-04-25": 169799390, "2026-04-26": 165577371, "2026-04-29": 5916844849}, "subs_by_product": {"ChatGPT Go": 29697, "FTTR": 5222, "Indihome Smart": 98087, "Jaringan Prioritas": 333207576, "ProtekSi Kecil": 1124525, "SIMPATI TikTok Streamer-1 Hari": 2403836, "Travel Assistant": 71015, "V-NSP": 168768350}, "rev_by_product": {"ChatGPT Go": 1330022266, "FTTR": 1057985341, "Indihome Smart": 1374136001, "Jaringan Prioritas": 10459520000, "ProtekSi Kecil": 370733551, "SIMPATI TikTok Streamer-1 Hari": 41040427610, "Travel Assistant": 18505250674, "V-NSP": 2134320574}, "ceto_latency": [{"Product Periode 20sd24Apr": "Siscamling", "Avg. Latency (s)": 44.6, "Qty (Trans)": 29, "Status": "OK"}, {"Product Periode 20sd24Apr": "Simpati Tiktok", "Avg. Latency (s)": 53.65, "Qty (Trans)": 33, "Status": "OK"}, {"Product Periode 20sd24Apr": "ChatGPT Go", "Avg. Latency (s)": 58.11, "Qty (Trans)": 31, "Status": "OK"}, {"Product Periode 20sd24Apr": "Travel Assistant", "Avg. Latency (s)": 65.82, "Qty (Trans)": 32, "Status": "OK"}, {"Product Periode 20sd24Apr": "V-NSP", "Avg. Latency (s)": 70.0, "Qty (Trans)": 33, "Status": "1 Lambat"}, {"Product Periode 20sd24Apr": "ProtekSi Kecil", "Avg. Latency (s)": 108.07, "Qty (Trans)": 33, "Status": "OK"}, {"Product Periode 20sd24Apr": "Fiber to the Room (FTTR)", "Avg. Latency (s)": 52.11, "Qty (Trans)": 30, "Status": "OK"}, {"Product Periode 20sd24Apr": "IndiHome SMART (CCTV)", "Avg. Latency (s)": 52.9, "Qty (Trans)": 30, "Status": "OK"}], "daily_count": {"2026-01-01": 51, "2026-01-02": 63, "2026-01-03": 64, "2026-01-04": 55, "2026-01-05": 82, "2026-01-06": 85, "2026-01-07": 73, "2026-01-08": 97, "2026-01-09": 62, "2026-01-10": 68, "2026-01-11": 53, "2026-01-12": 51, "2026-01-13": 74, "2026-01-14": 76, "2026-01-15": 85, "2026-01-16": 61, "2026-01-17": 107, "2026-01-18": 74, "2026-01-19": 102, "2026-01-20": 79, "2026-01-21": 95, "2026-01-22": 66, "2026-01-23": 78, "2026-01-24": 73, "2026-01-25": 78, "2026-01-26": 102, "2026-01-27": 85, "2026-01-28": 82, "2026-01-29": 86, "2026-01-30": 83, "2026-01-31": 97, "2026-02-01": 91, "2026-02-02": 89, "2026-02-03": 78, "2026-02-04": 88, "2026-02-05": 86, "2026-02-06": 68, "2026-02-07": 69, "2026-02-08": 67, "2026-02-09": 82, "2026-02-10": 67, "2026-02-11": 66, "2026-02-12": 62, "2026-02-13": 66, "2026-02-14": 50, "2026-02-15": 53, "2026-02-16": 75, "2026-02-17": 54, "2026-02-18": 72, "2026-02-19": 92, "2026-02-20": 73, "2026-02-21": 72, "2026-02-22": 59, "2026-02-23": 78, "2026-02-24": 78, "2026-02-25": 87, "2026-02-26": 68, "2026-02-27": 88, "2026-02-28": 97, "2026-03-01": 81, "2026-03-02": 60, "2026-03-03": 75, "2026-03-09": 73, "2026-03-10": 80, "2026-03-11": 58, "2026-03-12": 62, "2026-03-13": 66, "2026-03-14": 83, "2026-03-15": 63, "2026-03-16": 98, "2026-03-17": 95, "2026-03-18": 83, "2026-03-19": 67, "2026-03-20": 73, "2026-03-21": 22, "2026-03-22": 57, "2026-03-23": 67, "2026-03-24": 82, "2026-03-25": 70, "2026-03-26": 89, "2026-03-27": 102, "2026-03-28": 93, "2026-03-29": 87, "2026-03-30": 98, "2026-03-31": 117, "2026-04-01": 81, "2026-04-02": 92, "2026-04-03": 52, "2026-04-04": 68, "2026-04-05": 52, "2026-04-06": 83, "2026-04-07": 78, "2026-04-08": 72, "2026-04-09": 62, "2026-04-10": 88, "2026-04-11": 73, "2026-04-12": 63, "2026-04-13": 81, "2026-04-14": 64, "2026-04-15": 93, "2026-04-16": 88, "2026-04-17": 69, "2026-04-18": 82, "2026-04-19": 79}}};
+
+/* ============================================================
+   State
+   ============================================================ */
+const PALETTE = ['#ED1C24','#FF8A3D','#FFC93C','#5DD39E','#3B82F6','#A78BFA','#EC4899','#22D3EE','#F472B6','#84CC16','#FB7185'];
+const state = {
+  files: {},        // key -> {label, type:'kip'|'cohort'|'qa'|'custom', data:..., rows}
+  active: null,     // current file key
+  charts: [],       // active chart instances to clean up
+};
+
+/* ============================================================
+   Number/format helpers
+   ============================================================ */
+const fmt = n => {
+  if (n === null || n === undefined || isNaN(n)) return '–';
+  const a = Math.abs(n);
+  if (a >= 1e12) return (n/1e12).toFixed(2)+' T';
+  if (a >= 1e9)  return (n/1e9).toFixed(2)+' B';
+  if (a >= 1e6)  return (n/1e6).toFixed(2)+' M';
+  if (a >= 1e3)  return (n/1e3).toFixed(1)+' K';
+  return Math.round(n).toLocaleString('id-ID');
+};
+const fmtPlain = n => (n||0).toLocaleString('id-ID');
+const fmtIDR = n => 'Rp '+fmt(n);
+
+/* ============================================================
+   Toast
+   ============================================================ */
+function toast(msg, isErr){
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.className = 'toast show'+(isErr?' err':'');
+  clearTimeout(toast._t);
+  toast._t = setTimeout(()=>el.classList.remove('show'), 3200);
+}
+
+/* ============================================================
+   Chart defaults
+   ============================================================ */
+Chart.defaults.font.family = "'Inter Tight', sans-serif";
+Chart.defaults.font.size = 11;
+Chart.defaults.color = '#a3a3a3';
+Chart.defaults.borderColor = '#2a2a2a';
+
+function destroyCharts(){
+  state.charts.forEach(c => { try{c.destroy()}catch(e){} });
+  state.charts = [];
+}
+function makeChart(canvas, cfg){
+  const c = new Chart(canvas, cfg);
+  state.charts.push(c);
+  return c;
+}
+
+const baseOpts = (overrides={}) => ({
+  responsive:true, maintainAspectRatio:false,
+  plugins:{
+    legend:{
+      display:overrides.legend!==false,
+      position:overrides.legendPos||'top',
+      labels:{usePointStyle:true,boxWidth:8,boxHeight:8,padding:12,font:{size:11},color:'#a3a3a3'}
+    },
+    tooltip:{
+      backgroundColor:'#1c1c1c',titleColor:'#f5f5f5',bodyColor:'#f5f5f5',
+      borderColor:'#3a3a3a',borderWidth:1,padding:10,
+      titleFont:{size:12,weight:'600'},bodyFont:{size:12,family:"'JetBrains Mono', monospace"},
+      callbacks:overrides.tooltipCB||{}
+    }
+  },
+  scales:overrides.scales||{
+    x:{grid:{color:'#1f1f1f',drawTicks:false},ticks:{color:'#737373',font:{size:10}},border:{color:'#2a2a2a'}},
+    y:{grid:{color:'#1f1f1f',drawTicks:false},ticks:{color:'#737373',font:{size:10},callback:v=>fmt(v)},border:{color:'#2a2a2a'},beginAtZero:true}
+  },
+  ...overrides.extra
+});
+
+/* ============================================================
+   Initialize: load embedded data
+   ============================================================ */
+function initEmbedded(){
+  state.files['exec'] = {label:'★ Executive Summary', type:'exec', data:EMBEDDED, rows:EMBEDDED.kip.total_rows+EMBEDDED.cohort.total_rows+EMBEDDED.qa.total_rows, locked:true, isExec:true};
+  state.files['kip'] = {label:'KIP April 2026', type:'kip', data:EMBEDDED.kip, rows:EMBEDDED.kip.total_rows, locked:true};
+  state.files['cohort'] = {label:'Cohort LIS', type:'cohort', data:EMBEDDED.cohort, rows:EMBEDDED.cohort.total_rows, locked:true};
+  state.files['qa'] = {label:'QA Product Q1', type:'qa', data:EMBEDDED.qa, rows:EMBEDDED.qa.total_rows, locked:true};
+  state.active = 'exec';
+}
+
+/* ============================================================
+   File chips render
+   ============================================================ */
+function renderChips(){
+  const c = document.getElementById('chips');
+  c.innerHTML = '';
+  Object.entries(state.files).forEach(([key, f])=>{
+    const el = document.createElement('button');
+    el.className = 'chip'+(state.active===key?' active':'')+(f.locked?'':' user-added');
+    el.innerHTML = `<span>${f.label}</span><span class="chip-rows">${fmtPlain(f.rows)} rows</span>`;
+    if (!f.locked){
+      const x = document.createElement('span');
+      x.className='chip-x';x.textContent='×';
+      x.onclick = (e)=>{e.stopPropagation();delete state.files[key];if(state.active===key)state.active=Object.keys(state.files)[0];renderChips();renderActive();toast('File dihapus')};
+      el.appendChild(x);
+    }
+    el.onclick = ()=>{state.active=key;renderChips();renderActive()};
+    c.appendChild(el);
+  });
+}
+
+/* ============================================================
+   KPI / chart renderers per file type
+   ============================================================ */
+function renderActive(){
+  destroyCharts();
+  const f = state.files[state.active];
+  if (!f) return;
+  const body = document.getElementById('dashboardBody');
+  body.innerHTML = '';
+  if (f.type==='exec')   renderExecutive(body, f.data);
+  else if (f.type==='kip')    renderKip(body, f.data);
+  else if (f.type==='cohort') renderCohort(body, f.data);
+  else if (f.type==='qa')     renderQa(body, f.data);
+  else                        renderCustom(body, f.data);
+}
+
+/* ----- KPI strip helper ----- */
+function kpiStrip(items){
+  const wrap = document.createElement('div');
+  wrap.className = 'kpi-grid';
+  items.forEach((it,i)=>{
+    const k = document.createElement('div');
+    k.className = 'kpi k'+((i%5)+1);
+    k.innerHTML = `<div class="kpi-label">${it.label}</div><div class="kpi-value">${it.value}</div>${it.sub?`<div class="kpi-sub">${it.sub}</div>`:''}`;
+    wrap.appendChild(k);
+  });
+  return wrap;
+}
+
+function sectionTitle(num, text){
+  const el = document.createElement('div');
+  el.className='section-title';
+  el.innerHTML = `<span class="num">${num}</span>${text}`;
+  return el;
+}
+function chartCard(title, subtitle, tall){
+  const card = document.createElement('div');
+  card.className='card';
+  card.innerHTML = `<div class="card-head"><div class="card-title">${title}</div><div class="card-sub">${subtitle||''}</div></div><div class="chart-host${tall?' tall':''}"><canvas></canvas></div>`;
+  return card;
+}
+
+/* ============================================================
+   EXECUTIVE SUMMARY renderer
+   ============================================================ */
+function renderExecutive(body, ALL){
+  const kip = ALL.kip, coh = ALL.cohort, qa = ALL.qa;
+  const ticketRate = (coh.total_with_ticket / coh.total_lis * 100);
+  const revPerLis = coh.total_revenue / coh.total_lis;
+
+  // Pre-computed values
+  const trends = qa.monthly_trend;
+  const declineList = Object.entries(trends).map(([p, m])=>{
+    const jan = m['2026-01']||0, apr = m['2026-04']||0;
+    const pct = jan>0 ? ((apr-jan)/jan*100) : 0;
+    return {product:p, jan, apr, pct};
+  }).sort((a,b)=>a.pct-b.pct);
+  const wins = declineList.filter(x=>x.pct < -20).slice(0, 5);
+  const risks = declineList.filter(x=>x.pct > 20).slice(0, 5);
+
+  const regEnt = Object.entries(qa.by_regional).sort((a,b)=>b[1]-a[1]);
+  const totalReg = regEnt.reduce((s,e)=>s+e[1],0);
+  const top3Conc = regEnt.slice(0,3).reduce((s,e)=>s+e[1],0) / totalReg * 100;
+
+  const chTotal = Object.values(kip.by_unit_type).reduce((s,v)=>s+v,0);
+  const ccPct = (kip.by_unit_type['callcenter'] / chTotal * 100);
+
+  // ---- Hero narrative ----
+  const hero = document.createElement('div');
+  hero.className = 'exec-hero';
+  hero.innerHTML = `
+    <div class="exec-hero-label">★ Executive Summary · 6 Bulan terakhir</div>
+    <h2>1,49 juta LIS dengan ticket rate <span class="h">7,15%</span>. Tren komplain lifestyle products <span class="g">menurun -37% s.d. -54%</span>, tapi <span class="h">FTTR Jakarta naik +131%</span> &mdash; perlu deep-dive sebelum ekspansi nasional.</h2>
+  `;
+  body.appendChild(hero);
+
+  // ---- Headline KPI ----
+  body.appendChild(kpiStrip([
+    {label:'Total LIS', value:fmtPlain(coh.total_lis), sub:'pelanggan aktif · 6 bln'},
+    {label:'Ticket Rate', value:ticketRate.toFixed(2)+'%', sub:fmtPlain(coh.total_with_ticket)+' tickets'},
+    {label:'Revenue 6M', value:fmtIDR(coh.total_revenue), sub:'Rp '+fmt(revPerLis)+' / LIS'},
+    {label:'Q1 Records', value:fmtPlain(qa.total_rows), sub:Object.keys(qa.by_product).length+' products'},
+    {label:'Top Pain Point', value:'K26', sub:'subscription gagal'},
+  ]));
+
+  // ---- Bullet Points: Performance / Risk / CX ----
+  body.appendChild(sectionTitle('01', 'Ringkasan Eksekutif'));
+
+  const bulletGrid = document.createElement('div');
+  bulletGrid.className = 'bullet-grid';
+  bulletGrid.innerHTML = `
+    <div class="bullet-card perf">
+      <div class="bullet-card-head">
+        <span class="bullet-card-num">A · WIN</span>
+        <h4>Performance Highlights</h4>
+      </div>
+      <ul>
+        <li><b>Lifestyle products membaik konsisten</b> — komplain Q1→April turun di 7 dari 9 produk</li>
+        <li><b>CHATGPT Go</b>: 897 → 564 cases (<code>-37%</code>) — fix campaign dan UX terlihat berdampak</li>
+        <li><b>Travel Assistant</b>: 436 → 200 (<code>-54%</code>) — penurunan tertinggi di portfolio</li>
+        <li><b>Jaringan Prioritas</b>: 617 → 295 (<code>-52%</code>) di samping VNSP <code>-51%</code></li>
+        <li><b>Revenue 6 bulan</b>: Rp 578 M dari kohort, Rp ${fmt(revPerLis)} per LIS</li>
+        <li><b>Speed 100Mbps mendominasi</b> — 97,5% dari base LIS, indikasi product-market fit kuat</li>
+      </ul>
+    </div>
+
+    <div class="bullet-card risk">
+      <div class="bullet-card-head">
+        <span class="bullet-card-num">B · RISK</span>
+        <h4>Yang Perlu Diwaspadai</h4>
+      </div>
+      <ul>
+        <li><b>FTTR melonjak</b>: 140 → 324 cases (<code>+131%</code>) — satu-satunya produk dengan tren naik signifikan</li>
+        <li><b>Konsentrasi Jakarta-Banten</b>: 90% komplain FTTR (939 dari 1.040) — masalah onboarding di market launch</li>
+        <li><b>K26 "Subscription gagal"</b>: 537 cases lintas data (430 ChatGPT + 107 KIP April) — broken redemption flow</li>
+        <li><b>ProtekSi Kecil latency 108s</b> — 2× rata-rata produk lain, berisiko drop-off pembelian</li>
+        <li><b>Bill Shock</b>: 8 cases/bulan dari multi-OTT subscription stack di Customer Halo (hingga Rp 978K)</li>
+        <li><b>Beban geografis</b>: Jateng+Jabar+HQ = ${top3Conc.toFixed(0)}% dari semua komplain — resource imbalance</li>
+      </ul>
+    </div>
+
+    <div class="bullet-card cx">
+      <div class="bullet-card-head">
+        <span class="bullet-card-num">C · CX</span>
+        <h4>Customer Experience</h4>
+      </div>
+      <ul>
+        <li><b>Ticket Rate 7,15%</b> — dari 100 pelanggan, ~7 sampai membuka tiket. <b>92,85% silent</b> (tidak komplain ≠ tidak ada masalah)</li>
+        <li><b>Channel mix</b>: Call Center ${ccPct.toFixed(0)}%, Webservice ${(kip.by_unit_type.webservice/chTotal*100).toFixed(0)}%, GraPARI ${(kip.by_unit_type.grapari/chTotal*100).toFixed(0)}% — self-service masih underutilized</li>
+        <li><b>Top 3 issue codes</b>: K26 (subscription), K57 (SMS spam), K54 (modify offer/VAS)</li>
+        <li><b>Latency aktivasi</b>: 7 dari 8 produk sehat (44-66s), kecuali ProtekSi (108s) dan V-NSP (70s warn)</li>
+        <li><b>Konsentrasi region</b>: Jateng 35%, Jabar 28%, HQ 14% — ${top3Conc.toFixed(0)}% beban di top 3</li>
+        <li><b>Activation transactions</b>: 251 trans/5 hari di sample Ceto, status mostly OK</li>
+      </ul>
+    </div>
+  `;
+  body.appendChild(bulletGrid);
+
+  // ---- GLOSSARY ----
+  body.appendChild(sectionTitle('02', 'Apa Arti Parameter Ini?'));
+
+  const glossary = document.createElement('div');
+  glossary.className = 'glossary';
+  const gloss = [
+    {
+      term:'Ticket Rate',
+      val:ticketRate.toFixed(2)+'%',
+      desc:'Persentase pelanggan aktif (LIS) yang sampai membuka tiket keluhan dalam periode pengukuran. <b>7,15%</b> artinya dari 100 pelanggan, sekitar 7 yang komplain — sisanya silent (mungkin puas, mungkin churn diam-diam).',
+      formula:'LIS with ticket ÷ Total LIS × 100%'
+    },
+    {
+      term:'LIS (Live Subscriber)',
+      val:fmtPlain(coh.total_lis),
+      desc:'Jumlah pelanggan dengan layanan aktif di periode pengukuran. Ini base untuk semua perhitungan rasio. Kohort ini fokus di area Jakarta-Banten + Eastern Jabotabek selama Oct 2025 – Mar 2026.',
+      formula:'COUNT DISTINCT subscribers per month'
+    },
+    {
+      term:'Revenue per LIS',
+      val:'Rp '+fmt(revPerLis),
+      desc:'Rata-rata pendapatan dari billing per pelanggan dalam 6 bulan kohort. Indikator monetisasi & ARPU konversi yang lebih akurat dari ARPU bulanan karena melihat siklus penuh.',
+      formula:'Total Revenue ÷ Total LIS'
+    },
+    {
+      term:'Decline % (Jan→Apr)',
+      val:'-37% s.d. -54%',
+      desc:'Perubahan jumlah komplain antara Januari dan April 2026. <b>Negatif (hijau) = membaik</b>, positif (merah) = memburuk. Threshold yang dipakai: ±20% untuk masuk Win/Risk panel.',
+      formula:'(Apr − Jan) ÷ Jan × 100%'
+    },
+    {
+      term:'K-Code',
+      val:'K21·K26·K54·K57',
+      desc:'Kode klasifikasi keluhan internal. <b>K21</b>=produk umum, <b>K26</b>=subscription/aktivasi, <b>K41</b>=billing/tagihan, <b>K45</b>=registrasi, <b>K54</b>=modify offer/VAS, <b>K57</b>=SMS spam/penipuan.',
+      formula:'KCS coding system (internal)'
+    },
+    {
+      term:'Concentration %',
+      val:top3Conc.toFixed(0)+'%',
+      desc:'Persentase beban komplain dari top-3 region terhadap total. <b>'+top3Conc.toFixed(0)+'%</b> berarti ¾ beban support hanya dari 3 region — sinyal untuk re-allocate resource (CC agent, GraPARI staff) ke geografis yang sesungguhnya membutuhkan.',
+      formula:'Σ Top-3 region tickets ÷ Total tickets'
+    },
+    {
+      term:'Activation Latency (s)',
+      val:'44 – 108s',
+      desc:'Waktu rata-rata transaksi aktivasi produk dari klik sampai konfirmasi sukses. <b>&lt;60s = OK 🟢</b>, <b>60-70s = Warn 🟠</b>, <b>&gt;70s = Lambat 🔴</b>. Latency tinggi = drop-off pembelian & churn risk.',
+      formula:'AVG(end_time − start_time) per product'
+    },
+    {
+      term:'Bill Shock',
+      val:'8 / bulan',
+      desc:'Tagihan yang tiba-tiba membengkak dari ekspektasi pelanggan, biasanya akibat <i>subscription stacking</i> (ChatGPT + Adobe + Netflix di nomor yang sama, semua auto-renew). Range observasi: ratusan ribu hingga Rp 978K per case.',
+      formula:'K41 type_3 cases / period'
+    },
+    {
+      term:'Channel Mix',
+      val:ccPct.toFixed(0)+'% CC',
+      desc:'Distribusi kanal yang dipakai pelanggan untuk komplain. <b>Call Center dominan ('+ccPct.toFixed(0)+'%)</b> = kanal mahal & repetitive. Migrasi top issues ke chatbot atau in-app FAQ bisa potong cost CC ±30-40%.',
+      formula:'Tickets per channel ÷ Total tickets'
+    },
+  ];
+  glossary.innerHTML = gloss.map(g=>`
+    <div class="gloss-card">
+      <div class="gloss-term"><b>${g.term}</b><span class="gloss-val">${g.val}</span></div>
+      <p class="gloss-desc">${g.desc}</p>
+      <span class="gloss-formula">${g.formula}</span>
+    </div>
+  `).join('');
+  body.appendChild(glossary);
+
+  // ---- Win / Risk panels ----
+  body.appendChild(sectionTitle('03', 'Detail Tren per Produk'));
+
+  const panels = document.createElement('div');panels.className='panels';
+  panels.innerHTML = `
+    <div class="panel win">
+      <div class="panel-head">
+        <span class="panel-tag">Working</span>
+        <h3>Penurunan komplain Q1 → Apr</h3>
+      </div>
+      <ul class="panel-list">
+        ${wins.map(w=>`<li><span class="label"><b>${w.product}</b><br><span style="font-size:11px;font-family:var(--mono);color:var(--text-faint)">${w.jan} → ${w.apr}</span></span><span class="delta">${w.pct.toFixed(0)}%</span></li>`).join('')}
+      </ul>
+    </div>
+    <div class="panel risk">
+      <div class="panel-head">
+        <span class="panel-tag">At Risk</span>
+        <h3>Tren naik konsisten</h3>
+      </div>
+      <ul class="panel-list">
+        ${risks.map(r=>`<li><span class="label"><b>${r.product}</b><br><span style="font-size:11px;font-family:var(--mono);color:var(--text-faint)">${r.jan} → ${r.apr}</span></span><span class="delta">+${r.pct.toFixed(0)}%</span></li>`).join('')}
+        <li><span class="label"><b>K26 Subscription gagal</b><br><span style="font-size:11px;font-family:var(--mono);color:var(--text-faint)">CHATGPT Go redemption</span></span><span class="delta">${qa.top5_issues[0].Count}</span></li>
+        <li><span class="label"><b>Bill Shock cases</b><br><span style="font-size:11px;font-family:var(--mono);color:var(--text-faint)">multi-OTT subscription stack</span></span><span class="delta">8 / mo</span></li>
+      </ul>
+    </div>
+  `;
+  body.appendChild(panels);
+
+  // ---- Trend chart ----
+  body.appendChild(sectionTitle('04', 'Visual Tren Q1 → April 2026'));
+  const tCharts = document.createElement('div');tCharts.className='charts';
+  const cT = chartCard('Monthly Tickets per Product', 'Q1 → April · highlight FTTR', true);
+  cT.classList.add('wide');
+  tCharts.appendChild(cT);
+  const cR = chartCard('Konsentrasi Regional', 'Top 3 = '+top3Conc.toFixed(0)+'% complaints');
+  tCharts.appendChild(cR);
+  const cP = chartCard('Top Pain Points', 'most-occurring K-codes');
+  tCharts.appendChild(cP);
+  body.appendChild(tCharts);
+
+  const months = ['2026-01','2026-02','2026-03','2026-04'];
+  const products = Object.keys(trends);
+  const datasets = products.map((p,i)=>{
+    const isFttr = p==='FTTR';
+    return {
+      label:p,
+      data:months.map(m=>trends[p][m]||0),
+      borderColor:isFttr?'#ED1C24':PALETTE[(i+3)%PALETTE.length]+'cc',
+      backgroundColor:isFttr?'rgba(237,28,36,.18)':'transparent',
+      borderWidth:isFttr?3:1.5,
+      tension:0.3,
+      pointRadius:isFttr?4:2,
+      pointHoverRadius:6,
+      fill:isFttr,
+      order:isFttr?0:1,
+    };
+  });
+  makeChart(cT.querySelector('canvas'),{
+    type:'line',
+    data:{labels:months,datasets},
+    options:baseOpts({legendPos:'bottom'})
+  });
+
+  const top3 = regEnt.slice(0,3);
+  const restSum = regEnt.slice(3).reduce((s,e)=>s+e[1],0);
+  const rData = [...top3.map(e=>e[1]), restSum];
+  const rLabels = [...top3.map(e=>`${e[0]} (${(e[1]/totalReg*100).toFixed(0)}%)`), `Lainnya (${(restSum/totalReg*100).toFixed(0)}%)`];
+  makeChart(cR.querySelector('canvas'),{
+    type:'doughnut',
+    data:{labels:rLabels,datasets:[{data:rData,backgroundColor:[PALETTE[0],PALETTE[1],PALETTE[2],'#3a3a3a'],borderColor:'#141414',borderWidth:2}]},
+    options:baseOpts({scales:{},legendPos:'bottom'})
+  });
+
+  const painPoints = Object.entries(qa.top_type_3).slice(0,6);
+  makeChart(cP.querySelector('canvas'),{
+    type:'bar',
+    data:{labels:painPoints.map(e=>e[0].length>40?e[0].slice(0,40)+'…':e[0]),datasets:[{data:painPoints.map(e=>e[1]),backgroundColor:painPoints.map((_,i)=>i===0?'#ED1C24':PALETTE[i%PALETTE.length]),borderRadius:5,borderSkipped:false}]},
+    options:baseOpts({legend:false,extra:{indexAxis:'y'},
+      scales:{x:{grid:{color:'#1f1f1f'},ticks:{color:'#737373'},border:{color:'#2a2a2a'}},y:{grid:{display:false},ticks:{color:'#a3a3a3',font:{size:10}},border:{display:false}}}
+    })
+  });
+
+  // ---- System Health Latency ----
+  body.appendChild(sectionTitle('05', 'System Health · Activation Latency'));
+  const latGrid = document.createElement('div');latGrid.className='latency-grid';
+  qa.ceto_latency.forEach(c=>{
+    const lat = c['Avg. Latency (s)'];
+    const status = lat>70 ? 'bad' : lat>60 ? 'warn' : 'ok';
+    const cell = document.createElement('div');
+    cell.className = 'lat-cell '+status;
+    cell.innerHTML = `<div class="lat-prod">${c['Product Periode 20sd24Apr']}</div><div class="lat-val">${lat.toFixed(1)}s</div><div style="font-size:10px;color:var(--text-faint);font-family:var(--mono)">${c['Qty (Trans)']} trans · ${c.Status}</div>`;
+    latGrid.appendChild(cell);
+  });
+  body.appendChild(latGrid);
+
+  // ---- Recommended Actions ----
+  body.appendChild(sectionTitle('06', 'Recommended Executive Actions'));
+  const actions = [
+    {tag:'urgent', tagLabel:'Urgent · Engineering', title:'Fix ChatGPT Go redemption flow', body:'K26 "Pembelian berhasil namun subscription tidak didapatkan" = 430 cases di CHATGPT Go saja, plus 107 di KIP April. Pelanggan sudah bayar tapi tidak dapat akses → eskalasi refund → potensi churn. Engineering deep-dive ke voucher claim API.'},
+    {tag:'urgent', tagLabel:'Urgent · Product', title:'Audit FTTR Jakarta launch', body:'FTTR komplain naik +131% sejak Januari, 90% terkonsentrasi di Jakarta-Banten (939 dari 1.040). Sebelum ekspansi nasional, resolve root cause di Jakarta market terlebih dahulu.'},
+    {tag:'eff', tagLabel:'Efficiency · UX', title:'Optimize ProtekSi Kecil journey', body:'Avg latency aktivasi 108 detik (2× rata-rata produk lain). High-friction journey = drop-off pembelian. Backend & UX optimization, target turunkan ke <60s.'},
+    {tag:'gov', tagLabel:'Governance · Billing', title:'Bill Shock prevention untuk Halo multi-OTT', body:'Customer Halo dengan multiple OTT subscriptions (ChatGPT + Adobe + Netflix) = high-risk segment untuk billing dispute. Bisa hingga Rp 978K. Implement opt-in confirmation atau tier-based limit.'},
+    {tag:'eff', tagLabel:'Resource · Operations', title:'Reallocate CC ke Jateng & Jabar', body:'Jateng (35%) + Jabar (28%) + HQ (14%) = 77% beban support. Allocate tim CC mengikuti konsentrasi geografis ini, bukan distribusi merata.'},
+    {tag:'eff', tagLabel:'Efficiency · Channel', title:'Self-service untuk top-3 K-codes', body:'Call Center menyumbang 79% complaints. Top issues (K26, K57, K54) = repetitive & template-able. Chatbot atau in-app FAQ untuk top-3 K-codes berpotensi reduce 30-40% beban CC.'},
+  ];
+  const actionGrid = document.createElement('div');actionGrid.className='action-grid';
+  actions.forEach((a,i)=>{
+    const el = document.createElement('div');el.className='action';
+    el.innerHTML = `<span class="action-tag ${a.tag}">${a.tagLabel}</span><div class="action-num">0${i+1}</div><div class="action-title">${a.title}</div><div class="action-body">${a.body}</div>`;
+    actionGrid.appendChild(el);
+  });
+  body.appendChild(actionGrid);
+
+  // ---- Channel Mix mini section ----
+  body.appendChild(sectionTitle('07', 'Channel Mix · KIP April'));
+  const cmCharts = document.createElement('div');cmCharts.className='charts';
+  const cCM = chartCard('Tickets by Channel', 'KIP April 2026');
+  const cTC = chartCard('Top Issues per Product (Top 5)', 'cross-product');
+  cmCharts.appendChild(cCM);cmCharts.appendChild(cTC);
+  body.appendChild(cmCharts);
+
+  const chEnt = Object.entries(kip.by_unit_type);
+  makeChart(cCM.querySelector('canvas'),{
+    type:'doughnut',
+    data:{labels:chEnt.map(e=>`${e[0]} (${(e[1]/chTotal*100).toFixed(0)}%)`),datasets:[{data:chEnt.map(e=>e[1]),backgroundColor:[PALETTE[0],PALETTE[4],PALETTE[3]],borderColor:'#141414',borderWidth:2}]},
+    options:baseOpts({scales:{},legendPos:'bottom'})
+  });
+
+  const t5 = qa.top5_issues;
+  makeChart(cTC.querySelector('canvas'),{
+    type:'bar',
+    data:{labels:t5.map(t=>t.product_name),datasets:[{data:t5.map(t=>t.Count),backgroundColor:t5.map((_,i)=>PALETTE[i%PALETTE.length]),borderRadius:5,borderSkipped:false}]},
+    options:baseOpts({
+      legend:false,
+      tooltipCB:{
+        afterLabel:(ctx)=>t5[ctx.dataIndex].type_3,
+      }
+    })
+  });
+}
+
+/* ============================================================
+   KIP renderer
+   ============================================================ */
+function renderKip(body, d){
+  const top1 = Object.keys(d.by_product||{})[0]||'-';
+  body.appendChild(kpiStrip([
+    {label:'Total Tickets', value:fmtPlain(d.total_rows)},
+    {label:'Unique Products', value:Object.keys(d.by_product).length},
+    {label:'Top Product', value:top1, sub:fmtPlain(d.by_product[top1])+' tickets'},
+    {label:'Periode', value:d.date_range[0].slice(5), sub:'s.d. '+d.date_range[1].slice(5)},
+  ]));
+
+  body.appendChild(sectionTitle('01', 'Distribusi Tiket'));
+  const charts = document.createElement('div');charts.className='charts';
+
+  // Product bar
+  const c1 = chartCard('Tickets per Product', 'BAR');
+  charts.appendChild(c1);
+  const ent1 = Object.entries(d.by_product);
+  // Daily trend line
+  const c2 = chartCard('Daily Ticket Volume', 'LINE');
+  charts.appendChild(c2);
+  // Channel donut
+  const c3 = chartCard('By Unit Type', 'CHANNEL');
+  charts.appendChild(c3);
+  // Top type_3 horizontal bar
+  const c4 = chartCard('Top 10 Issues (type_3)', 'HORIZONTAL', true);
+  c4.classList.add('wide');
+  charts.appendChild(c4);
+
+  body.appendChild(charts);
+
+  makeChart(c1.querySelector('canvas'),{
+    type:'bar',
+    data:{labels:ent1.map(e=>e[0]),datasets:[{data:ent1.map(e=>e[1]),backgroundColor:ent1.map((_,i)=>PALETTE[i%PALETTE.length]),borderRadius:6,borderSkipped:false,maxBarThickness:48}]},
+    options:baseOpts({legend:false})
+  });
+
+  const dailyEntries = Object.entries(d.daily_count).sort();
+  makeChart(c2.querySelector('canvas'),{
+    type:'line',
+    data:{labels:dailyEntries.map(e=>e[0].slice(5)),datasets:[{data:dailyEntries.map(e=>e[1]),borderColor:'#ED1C24',backgroundColor:'rgba(237,28,36,0.12)',borderWidth:2,tension:0.32,pointRadius:0,pointHoverRadius:5,fill:true}]},
+    options:baseOpts({legend:false})
+  });
+
+  const ent3 = Object.entries(d.by_unit_type);
+  makeChart(c3.querySelector('canvas'),{
+    type:'doughnut',
+    data:{labels:ent3.map(e=>e[0]),datasets:[{data:ent3.map(e=>e[1]),backgroundColor:[PALETTE[0],PALETTE[4],PALETTE[3]],borderColor:'#141414',borderWidth:2}]},
+    options:baseOpts({scales:{},legendPos:'right'})
+  });
+
+  // Issues horizontal bar
+  const ent4 = Object.entries(d.top_type_3);
+  makeChart(c4.querySelector('canvas'),{
+    type:'bar',
+    data:{labels:ent4.map(e=>e[0].length>60?e[0].slice(0,60)+'…':e[0]),datasets:[{data:ent4.map(e=>e[1]),backgroundColor:ent4.map((_,i)=>PALETTE[i%PALETTE.length]),borderRadius:5,borderSkipped:false}]},
+    options:baseOpts({
+      legend:false,
+      extra:{indexAxis:'y'},
+      scales:{
+        x:{grid:{color:'#1f1f1f'},ticks:{color:'#737373'},beginAtZero:true,border:{color:'#2a2a2a'}},
+        y:{grid:{display:false},ticks:{color:'#a3a3a3',font:{size:10}},border:{display:false}}
+      }
+    })
+  });
+
+  // Sample table (just top issues for context)
+  body.appendChild(sectionTitle('02', 'Issues Reference Table'));
+  const rows = Object.entries(d.top_type_3).map(([k,v])=>({Issue:k, Count:v}));
+  body.appendChild(buildTable(rows, ['Issue','Count']));
+}
+
+/* ============================================================
+   Cohort renderer
+   ============================================================ */
+function renderCohort(body, d){
+  const ticketRate = (d.total_with_ticket / d.total_lis * 100).toFixed(2);
+  body.appendChild(kpiStrip([
+    {label:'Total LIS', value:fmtPlain(d.total_lis)},
+    {label:'With Ticket', value:fmtPlain(d.total_with_ticket), sub:ticketRate+'% rate'},
+    {label:'Total Revenue', value:fmtIDR(d.total_revenue)},
+    {label:'Total Usage', value:fmt(d.total_usage_gb)+' GB'},
+    {label:'Periode', value:d.month_range[0], sub:'s.d. '+d.month_range[1]},
+  ]));
+
+  body.appendChild(sectionTitle('01', 'Tren Bulanan'));
+  const charts = document.createElement('div');charts.className='charts';
+  const c1 = chartCard('LIS with Ticket per Bulan', 'TIME SERIES', true);c1.classList.add('wide');charts.appendChild(c1);
+  const c2 = chartCard('LIS by Region', 'BREAKDOWN');charts.appendChild(c2);
+  const c3 = chartCard('LIS by ARPU Group', 'SEGMENTATION');charts.appendChild(c3);
+  const c4 = chartCard('Tickets by Class Category', 'CATEGORY');charts.appendChild(c4);
+  body.appendChild(charts);
+
+  const monthEntries = Object.entries(d.by_month_with_ticket).sort();
+  makeChart(c1.querySelector('canvas'),{
+    type:'line',
+    data:{labels:monthEntries.map(e=>e[0]),datasets:[{label:'Tickets',data:monthEntries.map(e=>e[1]),borderColor:'#ED1C24',backgroundColor:'rgba(237,28,36,0.16)',borderWidth:2.5,tension:0.32,pointRadius:5,pointBackgroundColor:'#ED1C24',pointBorderColor:'#0a0a0a',pointBorderWidth:2,fill:true}]},
+    options:baseOpts({legend:false})
+  });
+
+  const regionEntries = Object.entries(d.by_region_top10).sort((a,b)=>b[1]-a[1]);
+  makeChart(c2.querySelector('canvas'),{
+    type:'bar',
+    data:{labels:regionEntries.map(e=>e[0]),datasets:[{data:regionEntries.map(e=>e[1]),backgroundColor:regionEntries.map((_,i)=>PALETTE[i%PALETTE.length]),borderRadius:5,borderSkipped:false,maxBarThickness:60}]},
+    options:baseOpts({legend:false})
+  });
+
+  const arpuEntries = Object.entries(d.by_arpu_group).sort();
+  makeChart(c3.querySelector('canvas'),{
+    type:'bar',
+    data:{labels:arpuEntries.map(e=>e[0]),datasets:[{data:arpuEntries.map(e=>e[1]),backgroundColor:arpuEntries.map((_,i)=>PALETTE[(i+2)%PALETTE.length]),borderRadius:5,borderSkipped:false}]},
+    options:baseOpts({legend:false})
+  });
+
+  const classEntries = Object.entries(d.by_class_cat);
+  makeChart(c4.querySelector('canvas'),{
+    type:'doughnut',
+    data:{labels:classEntries.map(e=>e[0]),datasets:[{data:classEntries.map(e=>e[1]),backgroundColor:[PALETTE[0],PALETTE[1],PALETTE[4]],borderColor:'#141414',borderWidth:2}]},
+    options:baseOpts({scales:{},legendPos:'right'})
+  });
+}
+
+/* ============================================================
+   QA renderer
+   ============================================================ */
+function renderQa(body, d){
+  const top1 = Object.keys(d.by_product||{})[0]||'-';
+  const top1count = d.by_product[top1]||0;
+  body.appendChild(kpiStrip([
+    {label:'Total Records', value:fmtPlain(d.total_rows)},
+    {label:'Products', value:Object.keys(d.by_product).length},
+    {label:'Top Product', value:top1, sub:fmtPlain(top1count)+' rec'},
+    {label:'Regional Coverage', value:Object.keys(d.by_regional).length},
+    {label:'Periode', value:d.date_range[0].slice(5), sub:'s.d. '+d.date_range[1].slice(5)},
+  ]));
+
+  body.appendChild(sectionTitle('01', 'Tren & Volume'));
+  const charts = document.createElement('div');charts.className='charts';
+  const c1 = chartCard('Monthly Trend per Product', 'MULTI-LINE', true);c1.classList.add('wide');charts.appendChild(c1);
+  const c2 = chartCard('Records per Product', 'BAR');charts.appendChild(c2);
+  const c3 = chartCard('By Regional', 'GEO');charts.appendChild(c3);
+  body.appendChild(charts);
+
+  // Monthly trend multi-line
+  const months = ['2026-01','2026-02','2026-03','2026-04'];
+  const products = Object.keys(d.monthly_trend);
+  const datasets = products.map((p,i)=>({
+    label:p,
+    data:months.map(m=>d.monthly_trend[p][m]||0),
+    borderColor:PALETTE[i%PALETTE.length],
+    backgroundColor:PALETTE[i%PALETTE.length]+'20',
+    borderWidth:2,tension:0.3,pointRadius:3,pointHoverRadius:6,
+  }));
+  makeChart(c1.querySelector('canvas'),{
+    type:'line',
+    data:{labels:months,datasets},
+    options:baseOpts({legendPos:'bottom'})
+  });
+
+  const prodEntries = Object.entries(d.by_product).sort((a,b)=>b[1]-a[1]);
+  makeChart(c2.querySelector('canvas'),{
+    type:'bar',
+    data:{labels:prodEntries.map(e=>e[0]),datasets:[{data:prodEntries.map(e=>e[1]),backgroundColor:prodEntries.map((_,i)=>PALETTE[i%PALETTE.length]),borderRadius:5,borderSkipped:false}]},
+    options:baseOpts({legend:false,extra:{indexAxis:'y'},
+      scales:{x:{grid:{color:'#1f1f1f'},ticks:{color:'#737373'},border:{color:'#2a2a2a'}},y:{grid:{display:false},ticks:{color:'#a3a3a3'},border:{display:false}}}
+    })
+  });
+
+  const regEntries = Object.entries(d.by_regional).sort((a,b)=>b[1]-a[1]);
+  makeChart(c3.querySelector('canvas'),{
+    type:'bar',
+    data:{labels:regEntries.map(e=>e[0]),datasets:[{data:regEntries.map(e=>e[1]),backgroundColor:regEntries.map((_,i)=>PALETTE[(i+1)%PALETTE.length]),borderRadius:5,borderSkipped:false}]},
+    options:baseOpts({legend:false})
+  });
+
+  body.appendChild(sectionTitle('02', 'Top Issues & Latency'));
+  const charts2 = document.createElement('div');charts2.className='charts';
+  const c4 = chartCard('Top 10 Issues (type_3)', 'HORIZONTAL', true);c4.classList.add('wide');charts2.appendChild(c4);
+  const c5 = chartCard('Average Latency per Product (s)', 'PERFORMANCE');charts2.appendChild(c5);
+  body.appendChild(charts2);
+
+  const issueEntries = Object.entries(d.top_type_3);
+  makeChart(c4.querySelector('canvas'),{
+    type:'bar',
+    data:{labels:issueEntries.map(e=>e[0].length>55?e[0].slice(0,55)+'…':e[0]),datasets:[{data:issueEntries.map(e=>e[1]),backgroundColor:issueEntries.map((_,i)=>PALETTE[i%PALETTE.length]),borderRadius:5,borderSkipped:false}]},
+    options:baseOpts({legend:false,extra:{indexAxis:'y'},
+      scales:{x:{grid:{color:'#1f1f1f'},ticks:{color:'#737373'},border:{color:'#2a2a2a'}},y:{grid:{display:false},ticks:{color:'#a3a3a3',font:{size:10}},border:{display:false}}}
+    })
+  });
+
+  const cetoSorted = [...d.ceto_latency].sort((a,b)=>a['Avg. Latency (s)']-b['Avg. Latency (s)']);
+  makeChart(c5.querySelector('canvas'),{
+    type:'bar',
+    data:{labels:cetoSorted.map(c=>c['Product Periode 20sd24Apr']),datasets:[{data:cetoSorted.map(c=>c['Avg. Latency (s)']),backgroundColor:cetoSorted.map(c=>c['Avg. Latency (s)']>70?'#ED1C24':c['Avg. Latency (s)']>60?'#FF8A3D':'#5DD39E'),borderRadius:5,borderSkipped:false}]},
+    options:baseOpts({legend:false,extra:{indexAxis:'y'},
+      scales:{x:{grid:{color:'#1f1f1f'},ticks:{color:'#737373',callback:v=>v+'s'},border:{color:'#2a2a2a'}},y:{grid:{display:false},ticks:{color:'#a3a3a3'},border:{display:false}}}
+    })
+  });
+
+  body.appendChild(sectionTitle('03', 'Top 5 Issues by Product'));
+  body.appendChild(buildTable(d.top5_issues, ['product_name','type_3','Count']));
+}
+
+/* ============================================================
+   Custom file renderer (for uploaded XLSX)
+   ============================================================ */
+function renderCustom(body, d){
+  // d = {sheets: [{name, headers, rows, numericCols, ...}], totalRows, ...}
+  const firstSheet = d.sheets[0];
+
+  body.appendChild(kpiStrip([
+    {label:'Total Rows', value:fmtPlain(d.totalRows)},
+    {label:'Sheets', value:d.sheets.length},
+    {label:'Active Sheet', value:firstSheet.name, sub:firstSheet.rows.length+' rows'},
+    {label:'Columns', value:firstSheet.headers.length},
+  ]));
+
+  // Sheet selector
+  if (d.sheets.length>1){
+    const tabs = document.createElement('div');
+    tabs.className='chips';tabs.style.borderBottom='none';tabs.style.marginBottom='8px';
+    d.sheets.forEach((s,i)=>{
+      const b = document.createElement('button');
+      b.className='chip'+(i===d.activeSheet?' active':'');
+      b.innerHTML = `<span>${s.name}</span><span class="chip-rows">${s.rows.length} rows</span>`;
+      b.onclick = ()=>{d.activeSheet=i;renderActive()};
+      tabs.appendChild(b);
+    });
+    body.appendChild(tabs);
+  }
+
+  const sheet = d.sheets[d.activeSheet||0];
+  body.appendChild(sectionTitle('01', 'Auto-Detected Charts'));
+
+  const charts = document.createElement('div');charts.className='charts';
+
+  // Try to find a date column + numeric column → time series
+  const dateCol = sheet.headers.find(h => sheet.colTypes[h]==='date');
+  const numCols = sheet.headers.filter(h => sheet.colTypes[h]==='number');
+  const catCols = sheet.headers.filter(h => sheet.colTypes[h]==='category');
+
+  if (dateCol && numCols.length){
+    const numCol = numCols[0];
+    const c = chartCard(`${numCol} over time`, 'TIME SERIES', true);
+    c.classList.add('wide');
+    charts.appendChild(c);
+    body.appendChild(charts);
+    const pts = sheet.rows.map(r=>({x:r[dateCol], y:Number(r[numCol])||0})).filter(p=>p.x);
+    pts.sort((a,b)=>new Date(a.x)-new Date(b.x));
+    setTimeout(()=>{
+      makeChart(c.querySelector('canvas'),{
+        type:'line',
+        data:{labels:pts.map(p=>p.x),datasets:[{data:pts.map(p=>p.y),borderColor:'#ED1C24',backgroundColor:'rgba(237,28,36,.12)',borderWidth:2,tension:0.3,pointRadius:0,pointHoverRadius:5,fill:true}]},
+        options:baseOpts({legend:false})
+      });
+    },10);
+  }
+
+  // Category breakdown
+  if (catCols.length){
+    const cat = catCols[0];
+    const counts = {};
+    sheet.rows.forEach(r=>{const v = r[cat];if(v!=null && v!=='') counts[v]=(counts[v]||0)+1});
+    const sorted = Object.entries(counts).sort((a,b)=>b[1]-a[1]).slice(0,12);
+    if (sorted.length){
+      if (charts.parentNode!==body) body.appendChild(charts);
+      const c2 = chartCard(`Distribution: ${cat}`, 'BREAKDOWN');
+      charts.appendChild(c2);
+      setTimeout(()=>{
+        makeChart(c2.querySelector('canvas'),{
+          type:'bar',
+          data:{labels:sorted.map(e=>String(e[0]).slice(0,30)),datasets:[{data:sorted.map(e=>e[1]),backgroundColor:sorted.map((_,i)=>PALETTE[i%PALETTE.length]),borderRadius:5,borderSkipped:false}]},
+          options:baseOpts({legend:false,extra:{indexAxis:'y'},
+            scales:{x:{grid:{color:'#1f1f1f'},ticks:{color:'#737373'},border:{color:'#2a2a2a'}},y:{grid:{display:false},ticks:{color:'#a3a3a3',font:{size:10}},border:{display:false}}}
+          })
+        });
+      },10);
+    }
+  }
+
+  // Numeric histogram-ish
+  if (numCols.length){
+    const nc = numCols[Math.min(1, numCols.length-1)];
+    const vals = sheet.rows.map(r=>Number(r[nc])).filter(v=>!isNaN(v));
+    if (vals.length){
+      if (charts.parentNode!==body) body.appendChild(charts);
+      const cN = chartCard(`Numeric: ${nc}`, `MIN ${fmt(Math.min(...vals))} · MAX ${fmt(Math.max(...vals))}`);
+      charts.appendChild(cN);
+      const bins = 20;
+      const lo = Math.min(...vals), hi = Math.max(...vals);
+      const step = (hi-lo)/bins || 1;
+      const hist = Array(bins).fill(0);
+      vals.forEach(v=>{const i=Math.min(bins-1, Math.floor((v-lo)/step));hist[i]++});
+      setTimeout(()=>{
+        makeChart(cN.querySelector('canvas'),{
+          type:'bar',
+          data:{labels:hist.map((_,i)=>fmt(lo+i*step)),datasets:[{data:hist,backgroundColor:'#5DD39E',borderRadius:3,borderSkipped:false}]},
+          options:baseOpts({legend:false})
+        });
+      },10);
+    }
+  }
+
+  if (!charts.parentNode) body.appendChild(charts);
+
+  // Data preview table
+  body.appendChild(sectionTitle('02', 'Data Preview'));
+  body.appendChild(buildTable(sheet.rows.slice(0,200), sheet.headers, sheet.rows.length>200?`${sheet.rows.length} rows total · showing first 200`:''));
+}
+
+/* ============================================================
+   Table builder
+   ============================================================ */
+function buildTable(rows, headers, note){
+  const wrap = document.createElement('div');
+  wrap.className = 'table-wrap';
+  if (note){
+    const h = document.createElement('div');h.className='table-head';
+    h.innerHTML = `<span style="color:var(--text-faint);font-size:12px;font-family:var(--mono)">${note}</span>`;
+    wrap.appendChild(h);
+  }
+  const sc = document.createElement('div');sc.className='tbl-scroll';
+  const t = document.createElement('table');t.className='tbl';
+  t.innerHTML = `<thead><tr>${headers.map(h=>`<th>${h}</th>`).join('')}</tr></thead><tbody>${
+    rows.map(r=>`<tr>${headers.map(h=>{
+      let v = r[h];
+      if (v==null || v==='') return '<td style="color:#444">–</td>';
+      if (typeof v==='number') return `<td style="color:#5DD39E">${fmt(v)}</td>`;
+      const s = String(v);
+      return `<td title="${s.replace(/"/g,'&quot;')}">${s.length>120?s.slice(0,120)+'…':s}</td>`;
+    }).join('')}</tr>`).join('')
+  }</tbody>`;
+  sc.appendChild(t);wrap.appendChild(sc);
+  return wrap;
+}
+
+/* ============================================================
+   File upload (Add File button + drag/drop)
+   ============================================================ */
+document.getElementById('addBtn').addEventListener('click',()=>document.getElementById('fileInput').click());
+document.getElementById('fileInput').addEventListener('change', e=>{
+  Array.from(e.target.files).forEach(handleFile);
+  e.target.value='';
+});
+
+['dragenter','dragover'].forEach(ev=>{
+  document.addEventListener(ev,e=>{e.preventDefault();document.getElementById('dropOverlay').classList.add('show')});
+});
+['dragleave','drop'].forEach(ev=>{
+  document.addEventListener(ev,e=>{
+    e.preventDefault();
+    if (ev==='dragleave' && e.relatedTarget) return;
+    document.getElementById('dropOverlay').classList.remove('show');
+    if (ev==='drop' && e.dataTransfer && e.dataTransfer.files){
+      Array.from(e.dataTransfer.files).forEach(handleFile);
+    }
+  });
+});
+
+function handleFile(file){
+  if (!/\.(xlsx|xls)$/i.test(file.name)){
+    toast('File harus XLSX/XLS', true);return;
+  }
+  toast('Membaca '+file.name+'…');
+  const reader = new FileReader();
+  reader.onload = e=>{
+    try {
+      const wb = XLSX.read(e.target.result, {type:'array', cellDates:true});
+      const sheets = wb.SheetNames.map(name=>{
+        const ws = wb.Sheets[name];
+        const arr = XLSX.utils.sheet_to_json(ws, {defval:'', raw:false});
+        if (!arr.length) return null;
+        const headers = Object.keys(arr[0]);
+        const colTypes = {};
+        headers.forEach(h=>{
+          const sample = arr.slice(0,200).map(r=>r[h]).filter(v=>v!=null && v!=='');
+          if (!sample.length){colTypes[h]='unknown';return}
+          const nums = sample.filter(v=>!isNaN(Number(v)) && v!==true && v!==false).length;
+          const dates = sample.filter(v=>{
+            const s = String(v);
+            return /^\d{4}-\d{2}-\d{2}/.test(s) || /^\d{1,2}\/\d{1,2}\/\d{2,4}/.test(s) || v instanceof Date;
+          }).length;
+          if (dates/sample.length > 0.7) colTypes[h]='date';
+          else if (nums/sample.length > 0.85) colTypes[h]='number';
+          else {
+            const uniq = new Set(sample.map(String)).size;
+            colTypes[h] = (uniq < sample.length*0.5 && uniq < 60) ? 'category' : 'text';
+          }
+        });
+        return {name, headers, rows:arr, colTypes};
+      }).filter(Boolean);
+
+      if (!sheets.length){toast('File kosong', true);return}
+
+      const totalRows = sheets.reduce((s,sh)=>s+sh.rows.length, 0);
+      const key = 'user_'+Date.now();
+      state.files[key] = {
+        label:file.name.replace(/\.(xlsx|xls)$/i,''),
+        type:'custom',
+        rows:totalRows,
+        data:{sheets, totalRows, activeSheet:0},
+        locked:false,
+      };
+      state.active = key;
+      renderChips();
+      renderActive();
+      toast(`✓ ${file.name} ditambahkan (${fmtPlain(totalRows)} rows)`);
+    } catch(err){
+      console.error(err);
+      toast('Error membaca file: '+err.message, true);
+    }
+  };
+  reader.onerror = ()=>toast('Gagal membaca file', true);
+  reader.readAsArrayBuffer(file);
+}
+
+/* ============================================================
+   Boot
+   ============================================================ */
+initEmbedded();
+renderChips();
+renderActive();
+</script>
+</body>
+</html>
